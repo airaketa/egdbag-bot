@@ -1,19 +1,37 @@
 package com.egdbag.covid.bot;
 
-import ru.mail.im.botapi.BotApiClient;
-import ru.mail.im.botapi.BotApiClientController;
-import ru.mail.im.botapi.api.entity.SendTextRequest;
-import ru.mail.im.botapi.fetcher.event.Event;
+import com.egdbag.covid.bot.service.BotService;
+import com.google.common.base.Strings;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Bot
 {
     public static void main(String[] args) throws IOException
     {
-        BotService bot = new BotService("001.0140280018.1752178673:752321177");
+        String config = getenv("CONFIG_FILE", "config.yaml");
+        File file = new File(config);
+        if (!file.exists())
+        {
+            System.out.println("Could not find config file: " + config);
+            return;
+        }
+        BotConfig botConfig = BotConfig.fromFile(file);
+
+        BotService bot = new BotService(botConfig);
 
         System.in.read();
-        bot.stop(); // stop when work done
+        bot.stop();
+    }
+
+    private static String getenv(String name, String def)
+    {
+        String value = System.getenv(name);
+        if (Strings.isNullOrEmpty(value))
+        {
+            value = def;
+        }
+        return value;
     }
 }

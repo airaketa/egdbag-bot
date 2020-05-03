@@ -1,4 +1,4 @@
-package com.egdbag.covid.bot;
+package com.egdbag.covid.bot.service;
 
 /**
  * Bot supported commands

@@ -1,7 +1,8 @@
-package com.egdbag.covid.bot;
+package com.egdbag.covid.bot.service;
 
+import com.egdbag.covid.bot.BotConfig;
 import com.egdbag.covid.bot.registry.Coordinates;
-import com.egdbag.covid.bot.registry.IRegistryService;
+import com.egdbag.covid.bot.registry.ISubscriptionRegistry;
 import com.egdbag.covid.bot.registry.UserSubscription;
 import com.egdbag.covid.bot.registry.debug.MapRegistry;
 import com.egdbag.covid.bot.registry.util.CoordinatesParser;
@@ -38,22 +39,22 @@ public class BotService
     private final List<List<InlineKeyboardButton>> keyboard;
 
     private final BotApiClient client;
-    private final IRegistryService registryService;
+    private final ISubscriptionRegistry registryService;
 
     private BotApiClientController controller;
 
     /**
      * Initializes bot
-     * @param token ICQ bot token, cannot be {@code null}
+     * @param config config containing ICQ bot token and other API keys, cannot be {@code null}
      */
-    public BotService(String token)
+    public BotService(BotConfig config)
     {
-        Preconditions.checkArgument(token != null);
+        Preconditions.checkArgument(config != null);
 
         registryService = new MapRegistry();
         keyboard = createKeyboard();
 
-        client = new BotApiClient(token);
+        client = new BotApiClient(config.getIcqToken());
         initializeBot();
 
         scheduler.scheduleAtFixedRate(this::checkNewCases, 0, 10, TimeUnit.SECONDS);

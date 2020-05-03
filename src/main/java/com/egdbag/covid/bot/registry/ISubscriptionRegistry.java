@@ -6,7 +6,7 @@ import java.util.Optional;
 /**
  * Registry for registering user subscriptions
  */
-public interface IRegistryService
+public interface ISubscriptionRegistry
 {
     /**
      * Gets all registered user subscriptions

@@ -1,6 +1,6 @@
 package com.egdbag.covid.bot.registry.debug;
 
-import com.egdbag.covid.bot.registry.IRegistryService;
+import com.egdbag.covid.bot.registry.ISubscriptionRegistry;
 import com.egdbag.covid.bot.registry.UserSubscription;
 import com.google.common.base.Preconditions;
 
@@ -8,9 +8,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Debug implementation for {@link IRegistryService}
+ * Debug implementation for {@link ISubscriptionRegistry}
  */
-public class MapRegistry implements IRegistryService
+public class MapRegistry implements ISubscriptionRegistry
 {
     private final Map<String, UserSubscription> registry;
 
