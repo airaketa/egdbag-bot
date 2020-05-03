@@ -5,6 +5,7 @@ import com.egdbag.covid.bot.registry.IRegistryService;
 import com.egdbag.covid.bot.registry.UserSubscription;
 import com.egdbag.covid.bot.registry.debug.MapRegistry;
 import com.egdbag.covid.bot.registry.util.CoordinatesParser;
+import com.egdbag.covid.bot.registry.util.MapLinkConstructor;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import ru.mail.im.botapi.api.entity.InlineKeyboardButton;
 import ru.mail.im.botapi.api.entity.SendTextRequest;
 import ru.mail.im.botapi.fetcher.event.CallbackQueryEvent;
 import ru.mail.im.botapi.fetcher.event.Event;
-import ru.mail.im.botapi.fetcher.event.NewChatMembersEvent;
 import ru.mail.im.botapi.fetcher.event.NewMessageEvent;
 
 import java.io.IOException;
@@ -30,6 +30,7 @@ import java.util.concurrent.*;
 public class BotService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(BotService.class);
+    private static final String STOP_COMMAND = "/stop";
 
     private final ExecutorService executor = new ThreadPoolExecutor(1,5,10,
             TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
@@ -90,22 +91,9 @@ public class BotService
         {
             processMessage((NewMessageEvent) event);
         }
-        else if (event instanceof NewChatMembersEvent)
-        {
-            processNewMemberEvent((NewChatMembersEvent) event);
-        }
         else if (event instanceof CallbackQueryEvent)
         {
             processCallbackQueryEvent((CallbackQueryEvent) event);
-        }
-    }
-
-    private void processNewMemberEvent(NewChatMembersEvent event)
-    {
-        String chatId = event.getChat().getChatId();
-        if (!Strings.isNullOrEmpty(chatId))
-        {
-            sendWelcomeMessage(chatId);
         }
     }
 
@@ -122,17 +110,25 @@ public class BotService
         Optional<Coordinates> optionalCoordinates = CoordinatesParser.parseGoogleGeoposition(message);
         if (optionalCoordinates.isPresent())
         {
+            Coordinates coords = optionalCoordinates.get();
             boolean existed =
-                    registryService.addSubscription(new UserSubscription(chatId, optionalCoordinates.get()));
+                    registryService.addSubscription(new UserSubscription(chatId, coords));
+            String mapLink = MapLinkConstructor.getHomeMap(coords);
             if (existed)
             {
-                sendMessageWithKeyboard(chatId, "Подписка добавлена.");
+                sendMessageWithKeyboard(chatId, "Подписка обновлена.\n" + mapLink);
             }
             else
             {
-                sendMessageWithKeyboard(chatId, "Подписка обновлена.");
+                sendMessageWithKeyboard(chatId, "Подписка добавлена.\n" + mapLink);
             }
             sendStatistics(chatId);
+            return;
+        }
+
+        if (STOP_COMMAND.equals(message))
+        {
+            registryService.removeSubscription(chatId);
             return;
         }
 
@@ -203,6 +199,7 @@ public class BotService
     {
         for (UserSubscription subscription : registryService.getSubscriptions())
         {
+            //TODO
             sendMessage(subscription.getChatId(), "Появилась обновленная информация по вашему району...");
         }
     }
@@ -214,6 +211,7 @@ public class BotService
 
     private void sendStatistics(String chatId)
     {
+        //TODO
         sendMessage(chatId, "Количество башкиров в вашем районе зашкаливает");
     }
 
