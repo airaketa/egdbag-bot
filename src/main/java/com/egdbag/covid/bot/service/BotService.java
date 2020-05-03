@@ -19,6 +19,7 @@ import ru.mail.im.botapi.BotApiClient;
 import ru.mail.im.botapi.BotApiClientController;
 import ru.mail.im.botapi.api.entity.AnswerCallbackQueryRequest;
 import ru.mail.im.botapi.api.entity.InlineKeyboardButton;
+import ru.mail.im.botapi.api.entity.SendFileRequest;
 import ru.mail.im.botapi.api.entity.SendTextRequest;
 import ru.mail.im.botapi.fetcher.event.CallbackQueryEvent;
 import ru.mail.im.botapi.fetcher.event.Event;
@@ -39,7 +40,6 @@ public class BotService
 
     private final ExecutorService executor = new ThreadPoolExecutor(1,5,10,
             TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
-    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final List<List<InlineKeyboardButton>> keyboard;
 
     private final BotApiClient client;
@@ -62,8 +62,6 @@ public class BotService
 
         client = new BotApiClient(config.getIcqToken());
         initializeBot();
-
-        //TODO scheduler.scheduleAtFixedRate(this::checkNewCases, 0, 10, TimeUnit.SECONDS);
     }
 
     private List<List<InlineKeyboardButton>> createKeyboard()
@@ -207,8 +205,8 @@ public class BotService
     {
         mapService.getNearbyShops(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
-            sendMessageWithKeyboard(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations)
-                    + "\n\n" + MessageBuilder.convertOrganisationsToMessage(organisations));
+            sendMessage(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations));
+            sendMessageWithKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
         });
     }
 
@@ -216,18 +214,9 @@ public class BotService
     {
         mapService.getNearbyHospitals(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
-            sendMessageWithKeyboard(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(),organisations)
-                    + "\n\n" + MessageBuilder.convertOrganisationsToMessage(organisations));
+            sendMessage(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(),organisations));
+            sendMessageWithKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
         });
-    }
-
-    private void checkNewCases()
-    {
-        for (UserSubscription subscription : registryService.getSubscriptions())
-        {
-            //TODO
-            sendMessage(subscription.getChatId(), "Появилась обновленная информация по вашему району...");
-        }
     }
 
     private void sendWelcomeMessage(String chatId)
@@ -238,7 +227,7 @@ public class BotService
     private void sendStatistics(String chatId)
     {
         //TODO
-        sendMessage(chatId, "Количество башкиров в вашем районе зашкаливает");
+        sendMessage(chatId, "Статистика по вашему району");
     }
 
     private void sendMessage(String chatId, String message)
