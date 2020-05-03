@@ -1,4 +1,4 @@
-package com.egdbag.covid.bot.registry;
+package com.egdbag.covid.bot.registry.subscriptions;
 
 import java.util.List;
 import java.util.Optional;

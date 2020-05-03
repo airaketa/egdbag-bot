@@ -1,6 +1,6 @@
-package com.egdbag.covid.bot.registry.util;
+package com.egdbag.covid.bot.util;
 
-import com.egdbag.covid.bot.registry.Coordinates;
+import com.egdbag.covid.bot.registry.subscriptions.Coordinates;
 import com.google.common.base.Preconditions;
 
 import java.util.Optional;

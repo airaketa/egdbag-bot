@@ -1,7 +1,7 @@
-package com.egdbag.covid.bot.registry.debug;
+package com.egdbag.covid.bot.registry.subscriptions.debug;
 
-import com.egdbag.covid.bot.registry.ISubscriptionRegistry;
-import com.egdbag.covid.bot.registry.UserSubscription;
+import com.egdbag.covid.bot.registry.subscriptions.ISubscriptionRegistry;
+import com.egdbag.covid.bot.registry.subscriptions.UserSubscription;
 import com.google.common.base.Preconditions;
 
 import java.util.*;

@@ -1,4 +1,4 @@
-package com.egdbag.covid.bot.registry;
+package com.egdbag.covid.bot.registry.subscriptions;
 
 /**
  * Coordinates of the subscribed user

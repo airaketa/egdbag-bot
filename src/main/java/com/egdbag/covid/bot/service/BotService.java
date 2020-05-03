@@ -1,12 +1,16 @@
 package com.egdbag.covid.bot.service;
 
 import com.egdbag.covid.bot.BotConfig;
-import com.egdbag.covid.bot.registry.Coordinates;
-import com.egdbag.covid.bot.registry.ISubscriptionRegistry;
-import com.egdbag.covid.bot.registry.UserSubscription;
-import com.egdbag.covid.bot.registry.debug.MapRegistry;
-import com.egdbag.covid.bot.registry.util.CoordinatesParser;
-import com.egdbag.covid.bot.registry.util.MapLinkConstructor;
+import com.egdbag.covid.bot.maps.IMapService;
+import com.egdbag.covid.bot.maps.Organisation;
+import com.egdbag.covid.bot.maps.yandex.YandexMapService;
+import com.egdbag.covid.bot.registry.subscriptions.Coordinates;
+import com.egdbag.covid.bot.registry.subscriptions.ISubscriptionRegistry;
+import com.egdbag.covid.bot.registry.subscriptions.UserSubscription;
+import com.egdbag.covid.bot.registry.subscriptions.debug.MapRegistry;
+import com.egdbag.covid.bot.util.CoordinatesParser;
+import com.egdbag.covid.bot.maps.yandex.MapLinkConstructor;
+import com.egdbag.covid.bot.util.MessageBuilder;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -39,6 +43,7 @@ public class BotService
     private final List<List<InlineKeyboardButton>> keyboard;
 
     private final BotApiClient client;
+    private final IMapService mapService;
     private final ISubscriptionRegistry registryService;
 
     private BotApiClientController controller;
@@ -51,13 +56,14 @@ public class BotService
     {
         Preconditions.checkArgument(config != null);
 
+        mapService = new YandexMapService(config.getYandexMapsKey());
         registryService = new MapRegistry();
         keyboard = createKeyboard();
 
         client = new BotApiClient(config.getIcqToken());
         initializeBot();
 
-        scheduler.scheduleAtFixedRate(this::checkNewCases, 0, 10, TimeUnit.SECONDS);
+        //TODO scheduler.scheduleAtFixedRate(this::checkNewCases, 0, 10, TimeUnit.SECONDS);
     }
 
     private List<List<InlineKeyboardButton>> createKeyboard()
@@ -114,7 +120,7 @@ public class BotService
             Coordinates coords = optionalCoordinates.get();
             boolean existed =
                     registryService.addSubscription(new UserSubscription(chatId, coords));
-            String mapLink = MapLinkConstructor.getHomeMap(coords);
+            String mapLink = mapService.getMap(coords);
             if (existed)
             {
                 sendMessageWithKeyboard(chatId, "Подписка обновлена.\n" + mapLink);
@@ -156,10 +162,10 @@ public class BotService
                 switch (callbackData)
                 {
                     case Commands.SHOPS_NEARBY:
-                        processCasesNearbyQuery(optionalSubscription.get(), chatId, queryId);
+                        processShopsNearbyQuery(optionalSubscription.get(), chatId, queryId);
                         break;
                     case Commands.CASES_NEARBY:
-                        processShopsNearbyQuery(optionalSubscription.get(), chatId, queryId);
+                        processCasesNearbyQuery(optionalSubscription.get(), chatId, queryId);
                         break;
                     case Commands.HOSPITALS_NEARBY:
                         processHospitalsNearbyQuery(optionalSubscription.get(), chatId, queryId);
@@ -189,11 +195,20 @@ public class BotService
 
     private void processShopsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
     {
-        //TODO
+        mapService.getNearbyShops(userSubscription.getCoordinates()).thenAccept(organisations -> {
+            answerCallBackQuery(queryId, null);
+            sendMessageWithKeyboard(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations)
+                    + '\n' + MessageBuilder.convertOrganisationsToMessage(organisations));
+        });
     }
+
     private void processHospitalsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
     {
-        //TODO
+        mapService.getNearbyHospitals(userSubscription.getCoordinates()).thenAccept(organisations -> {
+            answerCallBackQuery(queryId, null);
+            sendMessageWithKeyboard(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(),organisations)
+                    + '\n' + MessageBuilder.convertOrganisationsToMessage(organisations));
+        });
     }
 
     private void checkNewCases()

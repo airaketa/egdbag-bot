@@ -1,4 +1,4 @@
-package com.egdbag.covid.bot.registry;
+package com.egdbag.covid.bot.registry.subscriptions;
 
 import com.google.common.base.Preconditions;
 
