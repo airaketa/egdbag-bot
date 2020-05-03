@@ -8,14 +8,12 @@ import java.util.List;
 
 public final class MapLinkConstructor
 {
-    private static final String COORDS_TEMPLATE = "https://static-maps.yandex.ru/1.x/?ll={0},{1}&spn={2}&size=450,450&l=map&pt={0},{1},home";
-    private static final String POINT_TEMPLATE = "~{0},{1},pm2{2}l{3}";
+    private static final String COORDS_TEMPLATE = "https://static-maps.yandex.ru/1.x/?ll={0},{1}&size=450,450&l=map&pt={0},{1},home";
+    private static final String POINT_TEMPLATE = "~{0},{1},{2}";
 
-    private static final String DEFAULT_SPIN = "0.005,0.005";
-    private static final String HOSPITALS_SPIN = "0.15,0.15";
-
-    private static final String RED_COLOR ="rd";
-    private static final String DARK_GREEN_COLOR ="dg";
+    private static final String SHOP_POINT ="pm2rd";
+    private static final String HOSPITAL_POINT ="pm2dg";
+    private static final String DISEASE_POINT = "round";
 
     /**
      * Gets URL for the map with home icon placed by the given coordinates
@@ -25,7 +23,7 @@ public final class MapLinkConstructor
     public static String getHomeMap(Coordinates coordinates)
     {
         Preconditions.checkArgument(coordinates != null);
-        return getMap(coordinates, DEFAULT_SPIN);
+        return getMap(coordinates) + "&z=15";
     }
 
     /**
@@ -38,7 +36,7 @@ public final class MapLinkConstructor
     {
         Preconditions.checkArgument(coordinates != null);
         Preconditions.checkArgument(shopsCoordinates != null);
-        return getHomeMapWithPoints(coordinates, shopsCoordinates, RED_COLOR, DEFAULT_SPIN);
+        return getHomeMapWithPoints(coordinates, shopsCoordinates, SHOP_POINT, true);
     }
 
     /**
@@ -51,7 +49,20 @@ public final class MapLinkConstructor
     {
         Preconditions.checkArgument(coordinates != null);
         Preconditions.checkArgument(hospitalsCoordinates != null);
-        return getHomeMapWithPoints(coordinates, hospitalsCoordinates, DARK_GREEN_COLOR, HOSPITALS_SPIN);
+        return getHomeMapWithPoints(coordinates, hospitalsCoordinates, HOSPITAL_POINT, true);
+    }
+
+    /**
+     * Gets URL for the map with home icon and diseases nearby by the given coordinates
+     * @param coordinates coordinates of the home icon, cannot be {@code null}
+     * @param diseaseCoordinates coordinates for the disease cases points, cannot be {@code null}
+     * @return URL for the map with home icon and disease cases nearby, never {@code null}
+     */
+    public static String getHomeMapWithDiseases(Coordinates coordinates, List<Coordinates> diseaseCoordinates)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(diseaseCoordinates != null);
+        return getHomeMapWithPoints(coordinates, diseaseCoordinates, DISEASE_POINT, false);
     }
 
     /**
@@ -64,20 +75,23 @@ public final class MapLinkConstructor
         return String.valueOf(coord).replace(',', '.');
     }
 
-    private static String getMap(Coordinates coordinates, String spin)
+    private static String getMap(Coordinates coordinates)
     {
-        return MessageFormat.format(COORDS_TEMPLATE, coordToString(coordinates.getLongitude()),
-                coordToString(coordinates.getLatitude()), spin);
+        return MessageFormat.format(COORDS_TEMPLATE, coordToString(coordinates.getLongitude()), coordToString(coordinates.getLatitude()));
     }
 
-    private static String getHomeMapWithPoints(Coordinates coordinates, List<Coordinates> points, String color, String spin)
+    private static String getHomeMapWithPoints(Coordinates coordinates, List<Coordinates> points, String pointType, boolean includeIndex)
     {
-        StringBuilder builder = new StringBuilder(getMap(coordinates, spin));
+        StringBuilder builder = new StringBuilder(getMap(coordinates));
         for (int i = 0; i < points.size(); i++)
         {
             Coordinates point = points.get(i);
             builder.append(MessageFormat.format(POINT_TEMPLATE, coordToString(point.getLatitude()),
-                    coordToString(point.getLongitude()), color, i + 1));
+                    coordToString(point.getLongitude()), pointType));
+            if (includeIndex)
+            {
+                builder.append("l" + (i + 1));
+            }
         }
         return builder.toString();
     }

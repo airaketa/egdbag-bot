@@ -2,14 +2,15 @@ package com.egdbag.covid.bot.service;
 
 import com.egdbag.covid.bot.BotConfig;
 import com.egdbag.covid.bot.maps.IMapService;
-import com.egdbag.covid.bot.maps.Organisation;
 import com.egdbag.covid.bot.maps.yandex.YandexMapService;
+import com.egdbag.covid.bot.registry.cases.ICasesRegistry;
+import com.egdbag.covid.bot.registry.cases.debug.DebugCasesRegistry;
+import com.egdbag.covid.bot.registry.cases.debug.DiseaseCase;
 import com.egdbag.covid.bot.registry.subscriptions.Coordinates;
 import com.egdbag.covid.bot.registry.subscriptions.ISubscriptionRegistry;
 import com.egdbag.covid.bot.registry.subscriptions.UserSubscription;
-import com.egdbag.covid.bot.registry.subscriptions.debug.MapRegistry;
+import com.egdbag.covid.bot.registry.subscriptions.debug.DebugSubscriptionRegistry;
 import com.egdbag.covid.bot.util.CoordinatesParser;
-import com.egdbag.covid.bot.maps.yandex.MapLinkConstructor;
 import com.egdbag.covid.bot.util.MessageBuilder;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -19,13 +20,13 @@ import ru.mail.im.botapi.BotApiClient;
 import ru.mail.im.botapi.BotApiClientController;
 import ru.mail.im.botapi.api.entity.AnswerCallbackQueryRequest;
 import ru.mail.im.botapi.api.entity.InlineKeyboardButton;
-import ru.mail.im.botapi.api.entity.SendFileRequest;
 import ru.mail.im.botapi.api.entity.SendTextRequest;
 import ru.mail.im.botapi.fetcher.event.CallbackQueryEvent;
 import ru.mail.im.botapi.fetcher.event.Event;
 import ru.mail.im.botapi.fetcher.event.NewMessageEvent;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -44,7 +45,8 @@ public class BotService
 
     private final BotApiClient client;
     private final IMapService mapService;
-    private final ISubscriptionRegistry registryService;
+    private final ISubscriptionRegistry subscriptionsRegistry;
+    private final ICasesRegistry casesRegistry;
 
     private BotApiClientController controller;
 
@@ -57,7 +59,8 @@ public class BotService
         Preconditions.checkArgument(config != null);
 
         mapService = new YandexMapService(config.getYandexMapsKey());
-        registryService = new MapRegistry();
+        subscriptionsRegistry = new DebugSubscriptionRegistry();
+        casesRegistry = new DebugCasesRegistry();
         keyboard = createKeyboard();
 
         client = new BotApiClient(config.getIcqToken());
@@ -118,29 +121,30 @@ public class BotService
         {
             Coordinates coords = optionalCoordinates.get();
             boolean existed =
-                    registryService.addSubscription(new UserSubscription(chatId, coords));
+                    subscriptionsRegistry.addSubscription(new UserSubscription(chatId, coords));
             String mapLink = mapService.getMap(coords);
             if (existed)
             {
-                sendMessageWithKeyboard(chatId, "Подписка обновлена.\n" + mapLink);
+                sendMessageWithKeyboard(chatId, "Геотег обновлен\n" + mapLink);
             }
             else
             {
-                sendMessageWithKeyboard(chatId, "Подписка добавлена.\n" + mapLink);
+                sendMessageWithKeyboard(chatId, "Геотег добавлен\n" + mapLink);
             }
-            sendStatistics(chatId);
             return;
         }
 
         if (STOP_COMMAND.equals(message))
         {
-            registryService.removeSubscription(chatId);
+            subscriptionsRegistry.removeSubscription(chatId);
             return;
         }
 
-        if (registryService.getSubscription(chatId).isPresent())
+        Optional<UserSubscription> optionalUserSubscription = subscriptionsRegistry.getSubscription(chatId);
+        if (optionalUserSubscription.isPresent())
         {
-            sendStatistics(chatId);
+            String mapLink = mapService.getMap(optionalUserSubscription.get().getCoordinates());
+            sendMessageWithKeyboard(chatId, "Текущий геотег:\n" + mapLink);
         }
         else
         {
@@ -155,7 +159,7 @@ public class BotService
         String callbackData = event.getCallbackData();
         if (!Strings.isNullOrEmpty(chatId) && !Strings.isNullOrEmpty(queryId) && !Strings.isNullOrEmpty(callbackData))
         {
-            Optional<UserSubscription> optionalSubscription = registryService.getSubscription(chatId);
+            Optional<UserSubscription> optionalSubscription = subscriptionsRegistry.getSubscription(chatId);
             if (optionalSubscription.isPresent())
             {
                 switch (callbackData)
@@ -192,13 +196,20 @@ public class BotService
 
     private void processUnsubscribeQuery(String chatId, String queryId)
     {
-        registryService.removeSubscription(chatId);
+        subscriptionsRegistry.removeSubscription(chatId);
         answerCallBackQuery(queryId, "Подписка отменена.");
     }
 
     private void processCasesNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
     {
-        //TODO
+        answerCallBackQuery(queryId, null);
+        List<DiseaseCase> nearbyCases = casesRegistry.getNearbyCases(userSubscription.getCoordinates());
+        sendMessage(chatId, mapService.getDiseaseMap(userSubscription.getCoordinates(), nearbyCases));
+        sendMessageWithKeyboard(chatId,
+    (nearbyCases.size() > 0 ?
+                ("Количество недавних госпитализаций в радиусе 1 км: " + nearbyCases.size())
+                : "В радиусе 1 км недавних госпитализаций в вашем районе не обнаружено.")
+             + "\n\nИсточник: coronavirus.mash.ru");
     }
 
     private void processShopsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
@@ -221,13 +232,7 @@ public class BotService
 
     private void sendWelcomeMessage(String chatId)
     {
-        sendMessage(chatId, "Этот бот помогает отслеживать случаи заражения COVID-19 в вашем районе. Для того, чтобы подписаться на обновления в вашем районе, пришлите ваше местоположение.");
-    }
-
-    private void sendStatistics(String chatId)
-    {
-        //TODO
-        sendMessage(chatId, "Статистика по вашему району");
+        sendMessage(chatId, "Этот бот помогает отслеживать случаи заражения COVID-19 в указанном районе. Чтобы начать пользоваться, необходимо отправить свое местоположение.");
     }
 
     private void sendMessage(String chatId, String message)

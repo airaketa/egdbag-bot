@@ -10,11 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Debug implementation for {@link ISubscriptionRegistry}
  */
-public class MapRegistry implements ISubscriptionRegistry
+public class DebugSubscriptionRegistry implements ISubscriptionRegistry
 {
     private final Map<String, UserSubscription> registry;
 
-    public MapRegistry()
+    public DebugSubscriptionRegistry()
     {
         registry = new ConcurrentHashMap<>();
     }

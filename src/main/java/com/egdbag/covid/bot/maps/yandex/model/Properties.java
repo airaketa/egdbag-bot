@@ -13,6 +13,25 @@ public class Properties
     @JsonProperty("CompanyMetaData")
     private CompanyMetaData companyMetaData;
 
+    private String clusterCaption;
+    private String hintContent;
+
+    public String getClusterCaption() {
+        return clusterCaption;
+    }
+
+    public void setClusterCaption(String clusterCaption) {
+        this.clusterCaption = clusterCaption;
+    }
+
+    public String getHintContent() {
+        return hintContent;
+    }
+
+    public void setHintContent(String hintContent) {
+        this.hintContent = hintContent;
+    }
+
     public String getName() {
         return name;
     }

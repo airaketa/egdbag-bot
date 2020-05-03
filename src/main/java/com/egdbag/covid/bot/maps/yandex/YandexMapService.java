@@ -3,6 +3,7 @@ package com.egdbag.covid.bot.maps.yandex;
 import com.egdbag.covid.bot.maps.IMapService;
 import com.egdbag.covid.bot.maps.Organisation;
 import com.egdbag.covid.bot.maps.yandex.model.*;
+import com.egdbag.covid.bot.registry.cases.debug.DiseaseCase;
 import com.egdbag.covid.bot.registry.subscriptions.Coordinates;
 import com.google.common.base.Preconditions;
 
@@ -41,6 +42,36 @@ public class YandexMapService implements IMapService
     }
 
     @Override
+    public String getShopsMap(Coordinates coordinates, List<Organisation> shops)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(shops != null);
+
+        return MapLinkConstructor.getHomeMapWithShops(coordinates,
+                shops.stream().map(shop -> shop.getCoordinates()).collect(Collectors.toList()));
+    }
+
+    @Override
+    public String getHospitalsMap(Coordinates coordinates, List<Organisation> hospitals)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(hospitals != null);
+
+        return MapLinkConstructor.getHomeMapWithHospitals(coordinates,
+                hospitals.stream().map(hospital -> hospital.getCoordinates()).collect(Collectors.toList()));
+    }
+
+    @Override
+    public String getDiseaseMap(Coordinates coordinates, List<DiseaseCase> diseaseCases)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(diseaseCases != null);
+
+        return MapLinkConstructor.getHomeMapWithDiseases(coordinates,
+                diseaseCases.stream().map(diseaseCase -> diseaseCase.getCoordinates()).collect(Collectors.toList()));
+    }
+
+    @Override
     public CompletableFuture<List<Organisation>> getNearbyShops(Coordinates coordinates)
     {
         Preconditions.checkArgument(coordinates != null);
@@ -75,25 +106,7 @@ public class YandexMapService implements IMapService
         ).thenApply(this::convertToOrganisations);
     }
 
-    @Override
-    public String getShopsMap(Coordinates coordinates, List<Organisation> shops)
-    {
-        Preconditions.checkArgument(shops != null);
-
-        return MapLinkConstructor.getHomeMapWithShops(coordinates,
-                shops.stream().map(shop -> shop.getCoordinates()).collect(Collectors.toList()));
-    }
-
-    @Override
-    public String getHospitalsMap(Coordinates coordinates, List<Organisation> hospitals)
-    {
-        Preconditions.checkArgument(hospitals != null);
-
-        return MapLinkConstructor.getHomeMapWithHospitals(coordinates,
-                hospitals.stream().map(shop -> shop.getCoordinates()).collect(Collectors.toList()));
-    }
-
-    private List<Organisation> convertToOrganisations(OrganisationsResponse response)
+    private List<Organisation> convertToOrganisations(Response response)
     {
         List<Organisation> organisations = new ArrayList<>();
 

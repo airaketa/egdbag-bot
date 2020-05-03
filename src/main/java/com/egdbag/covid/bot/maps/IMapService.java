@@ -1,5 +1,6 @@
 package com.egdbag.covid.bot.maps;
 
+import com.egdbag.covid.bot.registry.cases.debug.DiseaseCase;
 import com.egdbag.covid.bot.registry.subscriptions.Coordinates;
 
 import java.util.List;
@@ -33,6 +34,14 @@ public interface IMapService
      * @return URL for the map, never {@code null}
      */
     String getHospitalsMap(Coordinates coordinates, List<Organisation> hospitals);
+
+    /**
+     * Gets URL for the map which displays given coordinates and surrounding disease cases nearby
+     * @param coordinates coordinates to get map for, cannot be {@code null}
+     * @param diseaseCases list of disease cases, cannot be {@code null}
+     * @return URL for the map, never {@code null}
+     */
+    String getDiseaseMap(Coordinates coordinates, List<DiseaseCase> diseaseCases);
 
     /**
      * Gets list of shops nearby of the specified coordinates

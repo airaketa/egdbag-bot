@@ -1,4 +1,4 @@
-package com.egdbag.covid.bot.maps.yandex;
+package com.egdbag.covid.bot.registry.cases.debug;
 
 import com.egdbag.covid.bot.maps.yandex.model.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,12 +13,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Class for http requests to yandex maps API
- */
 public class HttpRequester
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequester.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(com.egdbag.covid.bot.maps.yandex.HttpRequester.class);
+    private static final String MASH_URL = "https://coronavirus.mash.ru/data.json";
 
     private final HttpClient client;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -26,20 +24,19 @@ public class HttpRequester
     public HttpRequester()
     {
         client = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_2)
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
+                .version(HttpClient.Version.HTTP_2)
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
     }
 
     /**
-     * Requests organisations by the specified URL
-     * @param url url to send GET request to, cannot be {@code null}
+     * Requests data on covid cases
      * @return {@link CompletableFuture} with {@link Response}, never {@code null}
      */
-    public CompletableFuture<Response> getOrganisations(String url)
+    public CompletableFuture<Response> getDiseaseCases()
     {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
+                .uri(URI.create(MASH_URL))
                 .timeout(Duration.ofMinutes(1))
                 .GET()
                 .build();
