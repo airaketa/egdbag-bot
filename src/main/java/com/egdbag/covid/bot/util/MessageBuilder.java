@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public final class MessageBuilder
 {
-    private static final Pattern STREET_HOUSE_PATTERN = Pattern.compile("[а-яА-Я0-9\\- ]+, [0-9]+");
+    private static final Pattern STREET_HOUSE_PATTERN = Pattern.compile("[а-яА-ЯёЁ0-9\\- ]+, [а-я]*[0-9]+");
 
     /**
      * Converts organisations list to message
@@ -47,21 +47,8 @@ public final class MessageBuilder
 
             if (organisation.getPhones() != null && !organisation.getPhones().isEmpty())
             {
-                boolean first = true;
-                builder.append("\n☎");
-                for (String phone : organisation.getPhones())
-                {
-                    if (first)
-                    {
-                        builder.append(phone);
-                        first = false;
-                    }
-                    else
-                    {
-                        builder.append(", ");
-                        builder.append(phone);
-                    }
-                }
+                builder.append("\n\u260E");
+                builder.append(organisation.getPhones().);
             }
 
             builder.append('\n');
@@ -74,7 +61,7 @@ public final class MessageBuilder
         Matcher matcher = STREET_HOUSE_PATTERN.matcher(address);
         if (matcher.find())
         {
-            return address.substring(matcher.start());
+            return address.substring(matcher.start()).trim();
         }
         return address;
     }
@@ -84,15 +71,15 @@ public final class MessageBuilder
         switch(index)
         {
             case 0:
-                return "1️";
+                return "\u0031\uFE0F\u20E3";
             case 1:
-                return "2️";
+                return "\u0032\uFE0F\u20E3";
             case 2:
-                return "3️";
+                return "\u0033\uFE0F\u20E3";
             case 3:
-                return "4️";
+                return "\u0034\uFE0F\u20E3";
             case 4:
-                return "5️";
+                return "\u0035\uFE0F\u20E3";
             default:
                 return "• ";
         }

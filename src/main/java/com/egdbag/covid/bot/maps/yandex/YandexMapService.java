@@ -2,15 +2,14 @@ package com.egdbag.covid.bot.maps.yandex;
 
 import com.egdbag.covid.bot.maps.IMapService;
 import com.egdbag.covid.bot.maps.Organisation;
+import com.egdbag.covid.bot.maps.yandex.model.*;
 import com.egdbag.covid.bot.registry.subscriptions.Coordinates;
 import com.google.common.base.Preconditions;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class YandexMapService implements IMapService
@@ -101,20 +100,20 @@ public class YandexMapService implements IMapService
             {
                 for (Feature feature : features)
                 {
-                    Feature.Properties properties = feature.getProperties();
+                    Properties properties = feature.getProperties();
                     if (properties != null)
                     {
-                        Feature.Properties.CompanyMetaData metadata = properties.getCompanyMetaData();
+                        CompanyMetaData metadata = properties.getCompanyMetaData();
                         if (metadata != null)
                         {
-                            List<Feature.Properties.CompanyMetaData.Phone> phones = metadata.getPhones();
+                            List<Phone> phones = metadata.getPhones();
                             List<String> convertedPhones = null;
                             if (phones != null && !phones.isEmpty())
                             {
                                 convertedPhones = phones.stream().map(phone -> phone.getFormatted()).collect(Collectors.toList());
                             }
 
-                            Feature.Geometry geometry = feature.getGeometry();
+                            Geometry geometry = feature.getGeometry();
                             Coordinates coords = null;
                             if (geometry != null)
                             {

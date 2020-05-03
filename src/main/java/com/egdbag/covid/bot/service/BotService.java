@@ -208,7 +208,7 @@ public class BotService
         mapService.getNearbyShops(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
             sendMessageWithKeyboard(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations)
-                    + '\n' + MessageBuilder.convertOrganisationsToMessage(organisations));
+                    + "\n\n" + MessageBuilder.convertOrganisationsToMessage(organisations));
         });
     }
 
@@ -217,7 +217,7 @@ public class BotService
         mapService.getNearbyHospitals(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
             sendMessageWithKeyboard(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(),organisations)
-                    + '\n' + MessageBuilder.convertOrganisationsToMessage(organisations));
+                    + "\n\n" + MessageBuilder.convertOrganisationsToMessage(organisations));
         });
     }
 

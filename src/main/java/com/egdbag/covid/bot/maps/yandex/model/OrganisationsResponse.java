@@ -1,6 +1,6 @@
-package com.egdbag.covid.bot.maps.yandex;
+package com.egdbag.covid.bot.maps.yandex.model;
 
-import com.egdbag.covid.bot.maps.yandex.Feature;
+import com.egdbag.covid.bot.maps.yandex.model.Feature;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
