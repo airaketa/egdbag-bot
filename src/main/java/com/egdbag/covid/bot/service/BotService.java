@@ -72,6 +72,7 @@ public class BotService
             List.of(InlineKeyboardButton.callbackButton("Случаи поблизости", Commands.CASES_NEARBY)),
             List.of(InlineKeyboardButton.callbackButton("Магазины поблизости", Commands.SHOPS_NEARBY)),
             List.of(InlineKeyboardButton.callbackButton("Больницы поблизости", Commands.HOSPITALS_NEARBY)),
+            List.of(InlineKeyboardButton.callbackButton("Полезные ссылки", Commands.USEFUL_LINKS)),
             List.of(InlineKeyboardButton.callbackButton("Отписаться", Commands.UNSUBSCRIBE))
         );
     }
@@ -170,6 +171,9 @@ public class BotService
                     case Commands.HOSPITALS_NEARBY:
                         processHospitalsNearbyQuery(optionalSubscription.get(), chatId, queryId);
                         break;
+                    case Commands.USEFUL_LINKS:
+                        processUsefulLinksQuery(chatId, queryId);
+                        break;
                     case Commands.UNSUBSCRIBE:
                         processUnsubscribeQuery(chatId, queryId);
                         break;
@@ -180,6 +184,12 @@ public class BotService
                 answerCallBackQuery(queryId, "Нет активных подписок.");
             }
         }
+    }
+
+    private void processUsefulLinksQuery(String chatId, String queryId)
+    {
+        answerCallBackQuery(queryId, null);
+        sendMessageWithKeyboard(chatId, "Новости пандемии\nnews.mail.ru/story/incident/coronavirus\nОформление пропуска по Москве nedoma.mos.ru\nБесплатный тест на COVID-19\nhelp.yandex.ru/covid19-test\nСтатистика по Москве coronavirus.mash.ru\nСтатистика по миру coronavirus.jhu.edu/map\n");
     }
 
     private void processUnsubscribeQuery(String chatId, String queryId)
