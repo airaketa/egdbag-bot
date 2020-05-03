@@ -8,8 +8,11 @@ import java.util.List;
 
 public final class MapLinkConstructor
 {
-    private static final String COORDS_TEMPLATE = "https://static-maps.yandex.ru/1.x/?ll={0},{1}&size=450,450&l=map&pt={0},{1},home";
+    private static final String COORDS_TEMPLATE = "https://static-maps.yandex.ru/1.x/?ll={0},{1}&spn={2}&size=450,450&l=map&pt={0},{1},home";
     private static final String POINT_TEMPLATE = "~{0},{1},pm2{2}l{3}";
+
+    private static final String DEFAULT_SPIN = "0.005,0.005";
+    private static final String HOSPITALS_SPIN = "0.15,0.15";
 
     private static final String RED_COLOR ="rd";
     private static final String DARK_GREEN_COLOR ="dg";
@@ -22,8 +25,7 @@ public final class MapLinkConstructor
     public static String getHomeMap(Coordinates coordinates)
     {
         Preconditions.checkArgument(coordinates != null);
-        return MessageFormat.format(COORDS_TEMPLATE, coordToString(coordinates.getLongitude()),
-                coordToString(coordinates.getLatitude()));
+        return getMap(coordinates, DEFAULT_SPIN);
     }
 
     /**
@@ -36,7 +38,7 @@ public final class MapLinkConstructor
     {
         Preconditions.checkArgument(coordinates != null);
         Preconditions.checkArgument(shopsCoordinates != null);
-        return getHomeMapWithPoints(coordinates, shopsCoordinates, RED_COLOR);
+        return getHomeMapWithPoints(coordinates, shopsCoordinates, RED_COLOR, DEFAULT_SPIN);
     }
 
     /**
@@ -49,7 +51,7 @@ public final class MapLinkConstructor
     {
         Preconditions.checkArgument(coordinates != null);
         Preconditions.checkArgument(hospitalsCoordinates != null);
-        return getHomeMapWithPoints(coordinates, hospitalsCoordinates, DARK_GREEN_COLOR);
+        return getHomeMapWithPoints(coordinates, hospitalsCoordinates, DARK_GREEN_COLOR, HOSPITALS_SPIN);
     }
 
     /**
@@ -62,9 +64,15 @@ public final class MapLinkConstructor
         return String.valueOf(coord).replace(',', '.');
     }
 
-    private static String getHomeMapWithPoints(Coordinates coordinates, List<Coordinates> points, String color)
+    private static String getMap(Coordinates coordinates, String spin)
     {
-        StringBuilder builder = new StringBuilder(getHomeMap(coordinates));
+        return MessageFormat.format(COORDS_TEMPLATE, coordToString(coordinates.getLongitude()),
+                coordToString(coordinates.getLatitude()), spin);
+    }
+
+    private static String getHomeMapWithPoints(Coordinates coordinates, List<Coordinates> points, String color, String spin)
+    {
+        StringBuilder builder = new StringBuilder(getMap(coordinates, spin));
         for (int i = 0; i < points.size(); i++)
         {
             Coordinates point = points.get(i);

@@ -35,19 +35,19 @@ public final class MessageBuilder
 
             if (!Strings.isNullOrEmpty(organisation.getAddress()))
             {
-                builder.append("\n\uD83C\uDFE0");
+                builder.append("\n\uD83C\uDFE0 ");
                 builder.append(trimAddress(organisation.getAddress()));
             }
 
             if (!Strings.isNullOrEmpty(organisation.getUrl()))
             {
-                builder.append("\n\uD83C\uDF0E");
+                builder.append("\n\uD83C\uDF0E ");
                 builder.append(organisation.getUrl());
             }
 
             if (organisation.getPhones() != null && !organisation.getPhones().isEmpty())
             {
-                builder.append("\n\u260E");
+                builder.append("\n\u260E ");
                 builder.append(organisation.getPhones().get(0));
             }
 

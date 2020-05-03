@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 
 public class YandexMapService implements IMapService
 {
-    private static final String SEARCH_URL_TEMPLATE = "https://search-maps.yandex.ru/v1/?text={0}&ll={1},{2}&spn=0.15,0.10&lang=ru_RU&apikey={3}&results=5";
+    private static final String SEARCH_URL_TEMPLATE = "https://search-maps.yandex.ru/v1/?text={0}&ll={1},{2}&spn={3}&lang=ru_RU&apikey={4}&results=5";
+    private static final String SHOPS_SPIN = "0.005,0.005";
+    private static final String HOSPITALS_SPIN = "0.15,0.15";
     private static final String SHOPS_PARAM = "продукты";
     private static final String HOSPITALS_PARAM = "больницы";
 
@@ -49,6 +51,7 @@ public class YandexMapService implements IMapService
                         SHOPS_PARAM,
                         MapLinkConstructor.coordToString(coordinates.getLongitude()),
                         MapLinkConstructor.coordToString(coordinates.getLatitude()),
+                        SHOPS_SPIN,
                         apiKey
                 )
         )
@@ -66,6 +69,7 @@ public class YandexMapService implements IMapService
                 HOSPITALS_PARAM,
                 MapLinkConstructor.coordToString(coordinates.getLongitude()),
                 MapLinkConstructor.coordToString(coordinates.getLatitude()),
+                HOSPITALS_SPIN,
                 apiKey
             )
         ).thenApply(this::convertToOrganisations);
