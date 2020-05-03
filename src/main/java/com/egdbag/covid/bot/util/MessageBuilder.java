@@ -48,7 +48,7 @@ public final class MessageBuilder
             if (organisation.getPhones() != null && !organisation.getPhones().isEmpty())
             {
                 builder.append("\n\u260E");
-                builder.append(organisation.getPhones().);
+                builder.append(organisation.getPhones());
             }
 
             builder.append('\n');
