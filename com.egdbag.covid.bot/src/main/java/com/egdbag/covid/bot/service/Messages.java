@@ -4,8 +4,9 @@ public final class Messages
 {
     public static String Keyboards_Recent_cases_nearby = "Недавние\nслучаи рядом";
     public static String Keyboards_All_cases_nearby = "Все\nслучаи рядом";
-    public static String Keyboards_Shops_nearby = "Магазины поблизости";
-    public static String Keyboards_Hospitals_nearby = "Больницы поблизости";
+    public static String Keyboards_Shops_nearby = "Магазины\nпоблизости";
+    public static String Keyboards_Pharmacy_nearby = "Аптеки\nпоблизости";
+    public static String Keyboards_Hospitals_nearby = "Ближайшие больницы";
     public static String Keyboards_Tests_nearby = "Где сдать тест";
     public static String Keyboards_Useful_links = "Полезные ссылки";
     public static String Keyboards_Unsubscribe = "Удалить мои геоданные";
@@ -27,6 +28,7 @@ public final class Messages
     public static String BotService_Supported_only_in_moscow = "К сожалению, данная информация доступна только по Москве и МО";
 
     public static String BotService_No_shops_found = "К сожалению, магазинов поблизости не найдено";
+    public static String BotService_No_pharmacies_found = "К сожалению, аптек поблизости не найдено";
     public static String BotService_No_hospitals_found = "К сожалению, больниц поблизости не найдено";
     public static String BotService_No_test_points_found = "К сожалению, пунктов сдачи анализов на COVID-19 не найдено";
 

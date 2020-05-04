@@ -12,8 +12,9 @@ public final class MapLinkConstructor
     private static final String POINT_TEMPLATE = "~{0},{1},{2}";
 
     private static final String SHOP_POINT ="pm2rd";
-    private static final String HOSPITAL_POINT ="pm2dg";
-    private static final String TEST_POINT = "pm2gn";
+    private static final String PHARMACY_POINT ="pm2gn";
+    private static final String HOSPITAL_POINT ="pm2bl";
+    private static final String TEST_POINT = "pm2dg";
     private static final String DISEASE_POINT = "round";
 
     /**
@@ -38,6 +39,19 @@ public final class MapLinkConstructor
         Preconditions.checkArgument(coordinates != null);
         Preconditions.checkArgument(shopsCoordinates != null);
         return getHomeMapWithPoints(coordinates, shopsCoordinates, SHOP_POINT, true);
+    }
+
+    /**
+     * Gets URL for the map with home icon and pharmacies nearby by the given coordinates
+     * @param coordinates coordinates of the home icon, cannot be {@code null}
+     * @param shopsCoordinates coordinates for the pharmacies points, cannot be {@code null}
+     * @return URL for the map with home icon and pharmacies nearby, never {@code null}
+     */
+    public static String getHomeMapWithPharmacies(Coordinates coordinates, List<Coordinates> shopsCoordinates)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(shopsCoordinates != null);
+        return getHomeMapWithPoints(coordinates, shopsCoordinates, PHARMACY_POINT, true);
     }
 
     /**

@@ -11,6 +11,8 @@ public class Commands
 
     public static final String SHOPS_NEARBY = "shops_nearby";
 
+    public static final String PHARMACY_NEARBY = "pharmacy_nearby";
+
     public static final String TESTS_NEARBY = "tests_nearby";
 
     public static final String HOSPITALS_NEARBY = "hospitals_nearby";

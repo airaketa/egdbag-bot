@@ -21,6 +21,7 @@ public class YandexMapService implements IMapService
     private static final String SHOPS_SPIN = "0.005,0.005";
     private static final String HOSPITALS_SPIN = "0.15,0.15";
     private static final String SHOPS_PARAM = "%D0%BF%D1%80%D0%BE%D0%B4%D1%83%D0%BA%D1%82%D1%8B"; //продукты
+    private static final String PHARMACIES_PARAM = "%D0%B0%D0%BF%D1%82%D0%B5%D0%BA%D0%B8"; //аптеки
     private static final String HOSPITALS_PARAM = "%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D0%B8%D1%86%D1%8B"; //больницы
     private static final String TESTS_PARAM = "%D1%82%D0%B5%D1%81%D1%82+%D0%BD%D0%B0+%D0%BA%D0%BE%D1%80%D0%BE%D0%BD%D0%B0%D0%B2%D0%B8%D1%80%D1%83%D1%81"; //тест на коронавирус
 
@@ -56,6 +57,16 @@ public class YandexMapService implements IMapService
 
         return MapLinkConstructor.getHomeMapWithShops(coordinates,
             shops.stream().map(shop -> shop.getCoordinates()).collect(Collectors.toList()));
+    }
+
+    @Override
+    public String getPharmaciesMap(Coordinates coordinates, List<Organisation> pharmacies)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(pharmacies != null);
+
+        return MapLinkConstructor.getHomeMapWithPharmacies(coordinates,
+                pharmacies.stream().map(pharmacy -> pharmacy.getCoordinates()).collect(Collectors.toList()));
     }
 
     @Override
@@ -104,6 +115,24 @@ public class YandexMapService implements IMapService
                 )
         )
         .thenApply(this::convertToOrganisations);
+    }
+
+    @Override
+    public CompletableFuture<List<Organisation>> getNearbyPharmacies(Coordinates coordinates)
+    {
+        Preconditions.checkArgument(coordinates != null);
+
+        return requester.getOrganisations(
+                MessageFormat.format(
+                        SEARCH_URL_TEMPLATE,
+                        PHARMACIES_PARAM,
+                        MapLinkConstructor.coordToString(coordinates.getLongitude()),
+                        MapLinkConstructor.coordToString(coordinates.getLatitude()),
+                        SHOPS_SPIN,
+                        organisationsApiKey
+                )
+        )
+                .thenApply(this::convertToOrganisations);
     }
 
     @Override

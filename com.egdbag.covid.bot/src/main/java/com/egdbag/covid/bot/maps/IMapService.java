@@ -28,6 +28,14 @@ public interface IMapService
     String getShopsMap(Coordinates coordinates, List<Organisation> shops);
 
     /**
+     * Gets URL for the map which displays given coordinates and surrounding it list of pharmacies
+     * @param coordinates  coordinates to get map for, cannot be {@code null}
+     * @param shops list of pharmacies coordinates, cannot be {@code null}
+     * @return URL for the map, never {@code null}
+     */
+    String getPharmaciesMap(Coordinates coordinates, List<Organisation> shops);
+
+    /**
      * Gets URL for the map which displays given coordinates and surrounding it list of еуые
      * @param coordinates  coordinates to get map for, cannot be {@code null}
      * @param hospitals list of hospitals coordinates, cannot be {@code null}
@@ -57,6 +65,13 @@ public interface IMapService
      * @return {@link Future} with list of shops, never {@code null}
      */
     CompletableFuture<List<Organisation>> getNearbyShops(Coordinates coordinates);
+
+    /**
+     * Gets list of pharmacies nearby of the specified coordinates
+     * @param coordinates coordinates to search pharmacies nearby for, cannot be {@code null}
+     * @return {@link Future} with list of pharmacies, never {@code null}
+     */
+    CompletableFuture<List<Organisation>> getNearbyPharmacies(Coordinates coordinates);
 
     /**
      * Gets list of points of delivery of tests nearby of the specified coordinates

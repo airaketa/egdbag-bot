@@ -160,6 +160,9 @@ public class BotService
                     case Commands.SHOPS_NEARBY:
                         processShopsNearbyQuery(optionalSubscription.get(), chatId, queryId);
                         break;
+                    case Commands.PHARMACY_NEARBY:
+                        processPharmacyNearbyQuery(optionalSubscription.get(), chatId, queryId);
+                        break;
                     case Commands.RECENT_CASES_NEARBY:
                         processCasesNearbyQuery(optionalSubscription.get(), chatId, queryId, true);
                         break;
@@ -227,6 +230,21 @@ public class BotService
                     : BotService_No_cases_nearby)
                     + "\n\n" + BotService_Cases_source);
         }
+    }
+
+    private void processPharmacyNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
+    {
+        mapService.getNearbyPharmacies(userSubscription.getCoordinates()).thenAccept(organisations -> {
+            answerCallBackQuery(queryId, null);
+            if (organisations.isEmpty())
+            {
+                sendMessageWithMainKeyboard(chatId, BotService_No_pharmacies_found);
+            }
+            else {
+                sendMessage(chatId, mapService.getPharmaciesMap(userSubscription.getCoordinates(), organisations));
+                sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
+            }
+        });
     }
 
     private void processShopsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
