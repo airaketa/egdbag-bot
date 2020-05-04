@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface ICasesRegistry
 {
-    List<DiseaseCase> getNearbyCases(Coordinates coordinates);
+    List<DiseaseCase> getNearbyCases(Coordinates coordinates, boolean recent);
 }

@@ -6,10 +6,12 @@ public class DiseaseCase
 {
     private String address;
     private Coordinates coordinates;
+    private boolean recent;
 
-    public DiseaseCase(String address, Coordinates coordinates) {
+    public DiseaseCase(String address, Coordinates coordinates, boolean recent) {
         this.address = address;
         this.coordinates = coordinates;
+        this.recent = recent;
     }
 
     public String getAddress() {
@@ -26,5 +28,13 @@ public class DiseaseCase
 
     public void setCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public boolean isRecent() {
+        return recent;
+    }
+
+    public void setRecent(boolean recent) {
+        this.recent = recent;
     }
 }

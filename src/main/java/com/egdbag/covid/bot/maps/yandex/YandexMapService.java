@@ -18,8 +18,9 @@ public class YandexMapService implements IMapService
     private static final String SEARCH_URL_TEMPLATE = "https://search-maps.yandex.ru/v1/?text={0}&ll={1},{2}&spn={3}&lang=ru_RU&apikey={4}&results=5";
     private static final String SHOPS_SPIN = "0.005,0.005";
     private static final String HOSPITALS_SPIN = "0.15,0.15";
-    private static final String SHOPS_PARAM = "продукты";
-    private static final String HOSPITALS_PARAM = "больницы";
+    private static final String SHOPS_PARAM = "%D0%BF%D1%80%D0%BE%D0%B4%D1%83%D0%BA%D1%82%D1%8B"; //продукты
+    private static final String HOSPITALS_PARAM = "%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D0%B8%D1%86%D1%8B"; //больницы
+    private static final String TESTS_PARAM = "%D1%82%D0%B5%D1%81%D1%82+%D0%BD%D0%B0+%D0%BA%D0%BE%D1%80%D0%BE%D0%BD%D0%B0%D0%B2%D0%B8%D1%80%D1%83%D1%81"; //тест на коронавирус
 
     private final String apiKey;
     private final HttpRequester requester = new HttpRequester();
@@ -48,7 +49,7 @@ public class YandexMapService implements IMapService
         Preconditions.checkArgument(shops != null);
 
         return MapLinkConstructor.getHomeMapWithShops(coordinates,
-                shops.stream().map(shop -> shop.getCoordinates()).collect(Collectors.toList()));
+            shops.stream().map(shop -> shop.getCoordinates()).collect(Collectors.toList()));
     }
 
     @Override
@@ -58,7 +59,17 @@ public class YandexMapService implements IMapService
         Preconditions.checkArgument(hospitals != null);
 
         return MapLinkConstructor.getHomeMapWithHospitals(coordinates,
-                hospitals.stream().map(hospital -> hospital.getCoordinates()).collect(Collectors.toList()));
+            hospitals.stream().map(hospital -> hospital.getCoordinates()).collect(Collectors.toList()));
+    }
+
+    @Override
+    public String getTestsMap(Coordinates coordinates, List<Organisation> testPoints)
+    {
+        Preconditions.checkArgument(coordinates != null);
+        Preconditions.checkArgument(testPoints != null);
+
+        return MapLinkConstructor.getHomeMapWithTestPoints(coordinates,
+            testPoints.stream().map(testPoint -> testPoint.getCoordinates()).collect(Collectors.toList()));
     }
 
     @Override
@@ -87,6 +98,23 @@ public class YandexMapService implements IMapService
                 )
         )
         .thenApply(this::convertToOrganisations);
+    }
+
+    @Override
+    public CompletableFuture<List<Organisation>> getNearbyTests(Coordinates coordinates)
+    {
+        Preconditions.checkArgument(coordinates != null);
+
+        return requester.getOrganisations(
+                MessageFormat.format(
+                        SEARCH_URL_TEMPLATE,
+                        TESTS_PARAM,
+                        MapLinkConstructor.coordToString(coordinates.getLongitude()),
+                        MapLinkConstructor.coordToString(coordinates.getLatitude()),
+                        HOSPITALS_SPIN,
+                        apiKey
+                )
+        ).thenApply(this::convertToOrganisations);
     }
 
     @Override

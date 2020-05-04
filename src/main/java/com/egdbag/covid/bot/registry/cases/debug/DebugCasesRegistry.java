@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DebugCasesRegistry implements ICasesRegistry
 {
@@ -30,17 +31,19 @@ public class DebugCasesRegistry implements ICasesRegistry
     }
 
     @Override
-    public List<DiseaseCase> getNearbyCases(Coordinates coordinates)
+    public List<DiseaseCase> getNearbyCases(Coordinates coordinates, boolean recent)
     {
-        return cases.stream().filter(diseaseCase -> isNearby(coordinates, diseaseCase)).collect(Collectors.toList());
+        Stream<DiseaseCase> stream = cases.stream().filter(diseaseCase -> isNearby(coordinates, diseaseCase));
+        if (recent)
+        {
+            stream = stream.filter(DiseaseCase::isRecent);
+        }
+        return stream.collect(Collectors.toList());
     }
 
     private boolean isNearby(Coordinates userCoordinates, DiseaseCase diseaseCase)
     {
         Coordinates diseaseCoordinates = diseaseCase.getCoordinates();
-
-        System.out.println(userCoordinates.getLongitude() + " " + userCoordinates.getLatitude());
-        System.out.println((userCoordinates.getLongitude() + RADIUS) + " " + (userCoordinates.getLatitude() + RADIUS));
 
         //TODO yes, we know
         return Math.abs(diseaseCoordinates.getLatitude() - userCoordinates.getLongitude()) <= RADIUS &&
@@ -55,7 +58,6 @@ public class DebugCasesRegistry implements ICasesRegistry
             {
                 List<DiseaseCase> newCases = features
                     .stream()
-                    .filter(this::filterFeature)
                     .map(this::convert)
                     .collect(Collectors.toList());
 
@@ -71,10 +73,13 @@ public class DebugCasesRegistry implements ICasesRegistry
     private DiseaseCase convert(Feature feature)
     {
         List<Double> coordinates = feature.getGeometry().getCoordinates();
-        return new DiseaseCase(feature.getProperties().getHintContent(), new Coordinates(coordinates.get(1), coordinates.get(0)));
+        boolean recent = isRecent(feature);
+
+        return new DiseaseCase(feature.getProperties().getHintContent(),
+                new Coordinates(coordinates.get(1), coordinates.get(0)), recent);
     }
 
-    private boolean filterFeature(Feature feature)
+    private boolean isRecent(Feature feature)
     {
         Properties properties = feature.getProperties();
         if (properties != null)
@@ -83,5 +88,4 @@ public class DebugCasesRegistry implements ICasesRegistry
         }
         return false;
     }
-
 }

@@ -1,5 +1,8 @@
 package com.egdbag.covid.bot.service;
 
+import static com.egdbag.covid.bot.service.Keyboards.MAIN_KEYBOARD;
+import static com.egdbag.covid.bot.service.Messages.*;
+
 import com.egdbag.covid.bot.BotConfig;
 import com.egdbag.covid.bot.maps.IMapService;
 import com.egdbag.covid.bot.maps.yandex.YandexMapService;
@@ -26,7 +29,6 @@ import ru.mail.im.botapi.fetcher.event.Event;
 import ru.mail.im.botapi.fetcher.event.NewMessageEvent;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -41,7 +43,6 @@ public class BotService
 
     private final ExecutorService executor = new ThreadPoolExecutor(1,5,10,
             TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
-    private final List<List<InlineKeyboardButton>> keyboard;
 
     private final BotApiClient client;
     private final IMapService mapService;
@@ -61,21 +62,9 @@ public class BotService
         mapService = new YandexMapService(config.getYandexMapsKey());
         subscriptionsRegistry = new DebugSubscriptionRegistry();
         casesRegistry = new DebugCasesRegistry();
-        keyboard = createKeyboard();
 
         client = new BotApiClient(config.getIcqToken());
         initializeBot();
-    }
-
-    private List<List<InlineKeyboardButton>> createKeyboard()
-    {
-        return List.of(
-            List.of(InlineKeyboardButton.callbackButton("Случаи поблизости", Commands.CASES_NEARBY)),
-            List.of(InlineKeyboardButton.callbackButton("Магазины поблизости", Commands.SHOPS_NEARBY)),
-            List.of(InlineKeyboardButton.callbackButton("Больницы поблизости", Commands.HOSPITALS_NEARBY)),
-            List.of(InlineKeyboardButton.callbackButton("Полезные ссылки", Commands.USEFUL_LINKS)),
-            List.of(InlineKeyboardButton.callbackButton("Отписаться", Commands.UNSUBSCRIBE))
-        );
     }
 
     public void stop()
@@ -125,11 +114,11 @@ public class BotService
             String mapLink = mapService.getMap(coords);
             if (existed)
             {
-                sendMessageWithKeyboard(chatId, "Геотег обновлен\n" + mapLink);
+                sendMessageWithMainKeyboard(chatId, BotService_Geo_updated + '\n' + mapLink);
             }
             else
             {
-                sendMessageWithKeyboard(chatId, "Геотег добавлен\n" + mapLink);
+                sendMessageWithMainKeyboard(chatId, BotService_Geo_added + '\n' + mapLink);
             }
             return;
         }
@@ -144,7 +133,7 @@ public class BotService
         if (optionalUserSubscription.isPresent())
         {
             String mapLink = mapService.getMap(optionalUserSubscription.get().getCoordinates());
-            sendMessageWithKeyboard(chatId, "Текущий геотег:\n" + mapLink);
+            sendMessageWithMainKeyboard(chatId, BotService_Current_geo + '\n' + mapLink);
         }
         else
         {
@@ -167,8 +156,14 @@ public class BotService
                     case Commands.SHOPS_NEARBY:
                         processShopsNearbyQuery(optionalSubscription.get(), chatId, queryId);
                         break;
-                    case Commands.CASES_NEARBY:
-                        processCasesNearbyQuery(optionalSubscription.get(), chatId, queryId);
+                    case Commands.RECENT_CASES_NEARBY:
+                        processCasesNearbyQuery(optionalSubscription.get(), chatId, queryId, true);
+                        break;
+                    case Commands.ALL_CASES_NEARBY:
+                        processCasesNearbyQuery(optionalSubscription.get(), chatId, queryId, false);
+                        break;
+                    case Commands.TESTS_NEARBY:
+                        processTestsNearbyQuery(optionalSubscription.get(), chatId, queryId);
                         break;
                     case Commands.HOSPITALS_NEARBY:
                         processHospitalsNearbyQuery(optionalSubscription.get(), chatId, queryId);
@@ -183,7 +178,7 @@ public class BotService
             }
             else
             {
-                answerCallBackQuery(queryId, "Нет активных подписок.");
+                answerCallBackQuery(queryId, BotService_No_active_subscriptions);
             }
         }
     }
@@ -191,25 +186,37 @@ public class BotService
     private void processUsefulLinksQuery(String chatId, String queryId)
     {
         answerCallBackQuery(queryId, null);
-        sendMessageWithKeyboard(chatId, "Новости пандемии\nnews.mail.ru/story/incident/coronavirus\nОформление пропуска по Москве nedoma.mos.ru\nБесплатный тест на COVID-19\nhelp.yandex.ru/covid19-test\nСтатистика по Москве coronavirus.mash.ru\nСтатистика по миру coronavirus.jhu.edu/map\n");
+        sendMessageWithMainKeyboard(chatId, BotService_Useful_links);
     }
 
     private void processUnsubscribeQuery(String chatId, String queryId)
     {
         subscriptionsRegistry.removeSubscription(chatId);
-        answerCallBackQuery(queryId, "Подписка отменена.");
+        answerCallBackQuery(queryId, BotService_Unsubscribed);
     }
 
-    private void processCasesNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
+    private void processCasesNearbyQuery(UserSubscription userSubscription, String chatId, String queryId, boolean recent)
     {
         answerCallBackQuery(queryId, null);
-        List<DiseaseCase> nearbyCases = casesRegistry.getNearbyCases(userSubscription.getCoordinates());
+        List<DiseaseCase> nearbyCases = casesRegistry.getNearbyCases(userSubscription.getCoordinates(), recent);
         sendMessage(chatId, mapService.getDiseaseMap(userSubscription.getCoordinates(), nearbyCases));
-        sendMessageWithKeyboard(chatId,
-    (nearbyCases.size() > 0 ?
-                ("Количество недавних госпитализаций в радиусе 1 км: " + nearbyCases.size())
-                : "В радиусе 1 км недавних госпитализаций в вашем районе не обнаружено.")
-             + "\n\nИсточник: coronavirus.mash.ru");
+
+        if (recent)
+        {
+            sendMessageWithMainKeyboard(chatId,
+        (nearbyCases.size() > 0 ?
+                    (BotService_Nearby_recent_cases_amount  + nearbyCases.size())
+                    : BotService_No_recent_cases_nearby)
+                    + "\n\n" + BotService_Cases_source);
+        }
+        else
+        {
+            sendMessageWithMainKeyboard(chatId,
+        (nearbyCases.size() > 0 ?
+                    (BotService_All_nearby_cases_amount + nearbyCases.size())
+                    : BotService_No_cases_nearby)
+                    + "\n\n" + BotService_Cases_source);
+        }
     }
 
     private void processShopsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
@@ -217,7 +224,17 @@ public class BotService
         mapService.getNearbyShops(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
             sendMessage(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations));
-            sendMessageWithKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
+            sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
+        });
+    }
+
+    private void processTestsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
+    {
+        mapService.getNearbyTests(userSubscription.getCoordinates()).thenAccept(organisations -> {
+            answerCallBackQuery(queryId, null);
+            sendMessage(chatId, mapService.getTestsMap(userSubscription.getCoordinates(),organisations));
+            sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations)
+                    + "\n\u2757" + BotService_Check_info_before_going + "\n\n\u270F" + BotService_Issue_a_pass);
         });
     }
 
@@ -226,13 +243,14 @@ public class BotService
         mapService.getNearbyHospitals(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
             sendMessage(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(),organisations));
-            sendMessageWithKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
+            sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations)
+            + "\n\u270F" + BotService_Issue_a_pass);
         });
     }
 
     private void sendWelcomeMessage(String chatId)
     {
-        sendMessage(chatId, "Этот бот помогает отслеживать случаи заражения COVID-19 в указанном районе. Чтобы начать пользоваться, необходимо отправить свое местоположение.");
+        sendMessage(chatId, BotService_Welcome_message);
     }
 
     private void sendMessage(String chatId, String message)
@@ -258,7 +276,12 @@ public class BotService
         }
     }
 
-    private void sendMessageWithKeyboard(String chatId, String message)
+    private void sendMessageWithMainKeyboard(String chatId, String message)
+    {
+        sendMessageWithKeyboard(chatId, message, MAIN_KEYBOARD);
+    }
+
+    private void sendMessageWithKeyboard(String chatId, String message, List<List<InlineKeyboardButton>> keyboard)
     {
         sendMessage(new SendTextRequest()
             .setKeyboard(keyboard)
