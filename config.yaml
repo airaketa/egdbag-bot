@@ -1,0 +1,6 @@
+#ICQ New Bot token
+icqToken: 
+#key for yandex Organisation API for organisations search
+yandexOrganisationsApiKey: 
+#key for yandex Geocoder API for getting address by coordinates
+yandexGeocoderApiKey: 
