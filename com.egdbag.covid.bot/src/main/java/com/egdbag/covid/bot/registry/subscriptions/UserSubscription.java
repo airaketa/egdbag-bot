@@ -11,6 +11,10 @@ public class UserSubscription
     private Coordinates coordinates;
     private boolean inMoscow;
 
+    private String destination;
+    private String reason;
+    private String vehicleId;
+
     public UserSubscription(String chatId, Coordinates coordinates, boolean inMoscow)
     {
         Preconditions.checkArgument(chatId != null);
@@ -49,5 +53,29 @@ public class UserSubscription
 
     public void setInMoscow(boolean inMoscow) {
         this.inMoscow = inMoscow;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(String vehicleId) {
+        this.vehicleId = vehicleId;
     }
 }
