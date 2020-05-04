@@ -59,7 +59,7 @@ public class BotService
     {
         Preconditions.checkArgument(config != null);
 
-        mapService = new YandexMapService(config.getYandexMapsKey());
+        mapService = new YandexMapService(config.getYandexOrganisationsApiKey(), config.getYandexGeocoderApiKey());
         subscriptionsRegistry = new DebugSubscriptionRegistry();
         casesRegistry = new DebugCasesRegistry();
 
@@ -109,17 +109,16 @@ public class BotService
         if (optionalCoordinates.isPresent())
         {
             Coordinates coords = optionalCoordinates.get();
-            boolean existed =
-                    subscriptionsRegistry.addSubscription(new UserSubscription(chatId, coords));
-            String mapLink = mapService.getMap(coords);
-            if (existed)
-            {
-                sendMessageWithMainKeyboard(chatId, BotService_Geo_updated + '\n' + mapLink);
-            }
-            else
-            {
-                sendMessageWithMainKeyboard(chatId, BotService_Geo_added + '\n' + mapLink);
-            }
+            mapService.getAddressForCoordinates(coords).thenAccept(address -> {
+                boolean existed =
+                        subscriptionsRegistry.addSubscription(new UserSubscription(chatId, coords, checkAddress(address)));
+                String mapLink = mapService.getMap(coords);
+                if (existed) {
+                    sendMessageWithMainKeyboard(chatId, BotService_Geo_updated + '\n' + address + '\n' + mapLink);
+                } else {
+                    sendMessageWithMainKeyboard(chatId, BotService_Geo_added + '\n' + address + '\n' + mapLink);
+                }
+            });
             return;
         }
 
@@ -139,6 +138,11 @@ public class BotService
         {
             sendWelcomeMessage(chatId);
         }
+    }
+
+    private boolean checkAddress(String address)
+    {
+        return address.contains("Москва") || address.contains("Московская область");
     }
 
     private void processCallbackQueryEvent(CallbackQueryEvent event)
@@ -197,6 +201,12 @@ public class BotService
 
     private void processCasesNearbyQuery(UserSubscription userSubscription, String chatId, String queryId, boolean recent)
     {
+        if (!userSubscription.isInMoscow())
+        {
+            answerCallBackQuery(queryId, BotService_Supported_only_in_moscow);
+            return;
+        }
+
         answerCallBackQuery(queryId, null);
         List<DiseaseCase> nearbyCases = casesRegistry.getNearbyCases(userSubscription.getCoordinates(), recent);
         sendMessage(chatId, mapService.getDiseaseMap(userSubscription.getCoordinates(), nearbyCases));
@@ -223,18 +233,36 @@ public class BotService
     {
         mapService.getNearbyShops(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
-            sendMessage(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations));
-            sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
+            if (organisations.isEmpty())
+            {
+                sendMessageWithMainKeyboard(chatId, BotService_No_shops_found);
+            }
+            else {
+                sendMessage(chatId, mapService.getShopsMap(userSubscription.getCoordinates(), organisations));
+                sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations));
+            }
         });
     }
 
     private void processTestsNearbyQuery(UserSubscription userSubscription, String chatId, String queryId)
     {
+        if (!userSubscription.isInMoscow())
+        {
+            answerCallBackQuery(queryId, BotService_Supported_only_in_moscow);
+            return;
+        }
+
         mapService.getNearbyTests(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
-            sendMessage(chatId, mapService.getTestsMap(userSubscription.getCoordinates(),organisations));
-            sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations)
-                    + "\n\u2757" + BotService_Check_info_before_going + "\n\n\u270F" + BotService_Issue_a_pass);
+            if (organisations.isEmpty())
+            {
+                sendMessageWithMainKeyboard(chatId, BotService_No_test_points_found);
+            }
+            else {
+                sendMessage(chatId, mapService.getTestsMap(userSubscription.getCoordinates(), organisations));
+                sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations)
+                        + "\n\u2757" + BotService_Check_info_before_going + "\n\n\u270F" + BotService_Issue_a_pass);
+            }
         });
     }
 
@@ -242,9 +270,16 @@ public class BotService
     {
         mapService.getNearbyHospitals(userSubscription.getCoordinates()).thenAccept(organisations -> {
             answerCallBackQuery(queryId, null);
-            sendMessage(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(),organisations));
-            sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations)
-            + "\n\u270F" + BotService_Issue_a_pass);
+            if (organisations.isEmpty())
+            {
+                sendMessageWithMainKeyboard(chatId, BotService_No_hospitals_found);
+            }
+            else
+                {
+                sendMessage(chatId, mapService.getHospitalsMap(userSubscription.getCoordinates(), organisations));
+                sendMessageWithMainKeyboard(chatId, MessageBuilder.convertOrganisationsToMessage(organisations)
+                        + (userSubscription.isInMoscow() ? "\n\u270F" + BotService_Issue_a_pass : ""));
+            }
         });
     }
 

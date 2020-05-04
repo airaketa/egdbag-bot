@@ -71,4 +71,11 @@ public interface IMapService
      * @return {@link Future} with list of hospitals, never {@code null}
      */
     CompletableFuture<List<Organisation>> getNearbyHospitals(Coordinates coordinates);
+
+    /**
+     * Gets address by coordinates
+     * @param coordinates coordinates to get address for, cannot be {@code null}
+     * @return {@link CompletableFuture} with address string, never {@code null}
+     */
+    CompletableFuture<String> getAddressForCoordinates(Coordinates coordinates);
 }

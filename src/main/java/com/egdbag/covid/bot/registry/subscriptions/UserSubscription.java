@@ -9,14 +9,16 @@ public class UserSubscription
 {
     private String chatId;
     private Coordinates coordinates;
+    private boolean inMoscow;
 
-    public UserSubscription(String chatId, Coordinates coordinates)
+    public UserSubscription(String chatId, Coordinates coordinates, boolean inMoscow)
     {
         Preconditions.checkArgument(chatId != null);
         Preconditions.checkArgument(coordinates != null);
 
         this.chatId = chatId;
         this.coordinates = coordinates;
+        this.inMoscow = inMoscow;
     }
 
     public String getChatId()
@@ -39,5 +41,13 @@ public class UserSubscription
     {
         Preconditions.checkArgument(coordinates != null);
         this.coordinates = coordinates;
+    }
+
+    public boolean isInMoscow() {
+        return inMoscow;
+    }
+
+    public void setInMoscow(boolean inMoscow) {
+        this.inMoscow = inMoscow;
     }
 }

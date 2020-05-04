@@ -15,7 +15,8 @@ public class BotConfig
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     private String icqToken;
-    private String yandexMapsKey;
+    private String yandexOrganisationsApiKey;
+    private String yandexGeocoderApiKey;
 
     /**
      *
@@ -28,13 +29,12 @@ public class BotConfig
     }
 
     /**
-     *
-     * @param yandexMapsKey key for yandex maps API, cannot be {@code null}
+     * @param yandexOrganisationsApiKey key for yandex organisations API, cannot be {@code null}
      */
-    public void setYandexMapsKey(String yandexMapsKey)
+    public void setYandexOrganisationsApiKey(String yandexOrganisationsApiKey)
     {
-        Preconditions.checkArgument(yandexMapsKey != null);
-        this.yandexMapsKey = yandexMapsKey;
+        Preconditions.checkArgument(yandexOrganisationsApiKey != null);
+        this.yandexOrganisationsApiKey = yandexOrganisationsApiKey;
     }
 
     public String getIcqToken()
@@ -42,9 +42,22 @@ public class BotConfig
         return icqToken;
     }
 
-    public String getYandexMapsKey()
+    public String getYandexOrganisationsApiKey()
     {
-        return yandexMapsKey;
+        return yandexOrganisationsApiKey;
+    }
+
+    public String getYandexGeocoderApiKey() {
+        return yandexGeocoderApiKey;
+    }
+
+    /**
+     * @param yandexGeocoderApiKey key for yandex Geocoder API, cannot be {@code null}
+     */
+    public void setYandexGeocoderApiKey(String yandexGeocoderApiKey)
+    {
+        Preconditions.checkArgument(yandexGeocoderApiKey != null);
+        this.yandexGeocoderApiKey = yandexGeocoderApiKey;
     }
 
     /**

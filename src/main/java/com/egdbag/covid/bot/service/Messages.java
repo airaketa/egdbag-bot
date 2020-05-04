@@ -23,7 +23,12 @@ public final class Messages
     public static String BotService_Cases_source = "Источник: coronavirus.mash.ru";
     public static String BotService_Welcome_message = "Этот бот помогает отслеживать случаи заражения COVID-19 в указанном районе. Чтобы начать пользоваться, необходимо отправить свое местоположение.";
     public static String BotService_Check_info_before_going = "Рекомендуем проверить актуальность информации перед поездкой на сайте лаборатории";
-    public static String BotService_Issue_a_pass = "Оформить пропуск https://nedoma.mail.ru";
+    public static String BotService_Issue_a_pass = "Оформить пропуск nedoma.mail.ru";
+    public static String BotService_Supported_only_in_moscow = "К сожалению, данная информация доступна только по Москве и МО";
+
+    public static String BotService_No_shops_found = "К сожалению, магазинов поблизости не найдено";
+    public static String BotService_No_hospitals_found = "К сожалению, больниц поблизости не найдено";
+    public static String BotService_No_test_points_found = "К сожалению, пунктов сдачи анализов на COVID-19 не найдено";
 
     private Messages()
     {
