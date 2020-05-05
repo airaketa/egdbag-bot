@@ -11,6 +11,8 @@ public final class MapLinkConstructor
     private static final String COORDS_TEMPLATE = "https://static-maps.yandex.ru/1.x/?ll={0},{1}&size=450,450&l=map&pt={0},{1},home";
     private static final String POINT_TEMPLATE = "~{0},{1},{2}";
 
+    private static final int MAX_INDEX = 98;
+
     private static final String SHOP_POINT ="pm2rd";
     private static final String PHARMACY_POINT ="pm2gn";
     private static final String HOSPITAL_POINT ="pm2bl";
@@ -111,7 +113,8 @@ public final class MapLinkConstructor
     private static String getHomeMapWithPoints(Coordinates coordinates, List<Coordinates> points, String pointType, boolean includeIndex)
     {
         StringBuilder builder = new StringBuilder(getMap(coordinates));
-        for (int i = 0; i < points.size(); i++)
+        int i = 0;
+        while (i < points.size() && i <= MAX_INDEX)
         {
             Coordinates point = points.get(i);
             builder.append(MessageFormat.format(POINT_TEMPLATE, coordToString(point.getLatitude()),
@@ -120,6 +123,7 @@ public final class MapLinkConstructor
             {
                 builder.append("l" + (i + 1));
             }
+            i++;
         }
         return builder.toString();
     }
