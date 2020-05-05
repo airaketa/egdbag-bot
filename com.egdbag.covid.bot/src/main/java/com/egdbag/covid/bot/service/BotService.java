@@ -135,6 +135,7 @@ public class BotService
 
         if (STOP_COMMAND.equals(message))
         {
+            userStates.remove(chatId);
             subscriptionsRegistry.removeSubscription(chatId);
             return;
         }
@@ -142,24 +143,25 @@ public class BotService
         String userState = userStates.get(chatId);
         if (!Strings.isNullOrEmpty(chatId))
         {
-            switch(userState)
-            {
-                case States.PASS_GEO:
-                    sendMessageWithKeyboard(chatId, BotService_Send_geo, Keyboards.PASS_CANCEL_KEYBOARD);
-                    return;
-                case States.PASS_REASON:
-                    processPassReason(chatId, message);
-                    return;
-                case States.PASS_VEHICLE_ID:
-                    processVehicleId(chatId, message);
-                    return;
-                case States.PASS_PASSPORT:
-                    processPassport(chatId, message);
-                    return;
-                case States.PASS_DONE:
-                    userStates.put(chatId, States.MAIN);
-                    sendMainScreen(chatId);
-                    return;
+            if (!Strings.isNullOrEmpty(userState)) {
+                switch (userState) {
+                    case States.PASS_GEO:
+                        sendMessageWithKeyboard(chatId, BotService_Send_geo, Keyboards.PASS_CANCEL_KEYBOARD);
+                        return;
+                    case States.PASS_REASON:
+                        processPassReason(chatId, message);
+                        return;
+                    case States.PASS_VEHICLE_ID:
+                        processVehicleId(chatId, message);
+                        return;
+                    case States.PASS_PASSPORT:
+                        processPassport(chatId, message);
+                        return;
+                    case States.PASS_DONE:
+                        userStates.put(chatId, States.MAIN);
+                        sendMainScreen(chatId);
+                        return;
+                }
             }
         }
         sendMainScreen(chatId);
