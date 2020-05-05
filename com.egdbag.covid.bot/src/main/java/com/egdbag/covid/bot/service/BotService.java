@@ -293,14 +293,25 @@ public class BotService
         if (!Strings.isNullOrEmpty(chatId))
         {
             String userState = userStates.get(chatId);
-            switch(userState)
+            if (!Strings.isNullOrEmpty(userState))
             {
-                case States.MAIN:
-                    processMainCallbackQueryEvent(event);
-                    break;
-                default:
-                    processPassCallbackQueryEvent(event);
-                    break;
+                switch (userState) {
+                    case States.MAIN:
+                        processMainCallbackQueryEvent(event);
+                        break;
+                    default:
+                        processPassCallbackQueryEvent(event);
+                        break;
+                }
+            }
+            else
+            {
+                String queryId = event.getQueryId();
+                if (!Strings.isNullOrEmpty(queryId))
+                {
+                    answerCallBackQuery(queryId, null);
+                }
+                sendMainScreen(chatId);
             }
         }
     }
