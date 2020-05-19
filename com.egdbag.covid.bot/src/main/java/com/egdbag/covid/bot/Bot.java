@@ -21,7 +21,10 @@ public class Bot
 
         BotService bot = new BotService(botConfig);
 
-        System.in.read();
+        while (System.in.read() != 1)
+        {
+            //nop
+        }
         bot.stop();
     }
 
