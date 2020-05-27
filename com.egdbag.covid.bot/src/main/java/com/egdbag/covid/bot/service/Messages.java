@@ -20,7 +20,7 @@ public final class Messages
     public static String BotService_Geo_added = "Геотег добавлен";
     public static String BotService_Current_geo = "Текущий геотег:";
     public static String BotService_No_active_subscriptions = "Отправьте свое местоположение";
-    public static String BotService_Useful_links = "Новости пандемии\nnews.mail.ru/story/incident/coronavirus\nОформление пропуска по Москве nedoma.mos.ru\nБесплатный тест на COVID-19\nhelp.yandex.ru/covid19-test\nСайт минздрава РФ covid19.rosminzdrav.ru\nСтатистика по миру coronavirus.jhu.edu/map\n";
+    public static String BotService_Useful_links = "Новости пандемии\nnews.mail.ru/story/incident/coronavirus\nОформление пропуска по Москве nedoma.mos.ru\nБесплатный тест на COVID-19\nmosgorzdrav.ru/covid-test\nСайт минздрава РФ covid19.rosminzdrav.ru\nСтатистика по миру coronavirus.jhu.edu/map\n";
     public static String BotService_Unsubscribed = "Геоданные удалены";
     public static String BotService_Nearby_recent_cases_amount = "Количество недавних госпитализаций в радиусе 1 км: ";
     public static String BotService_No_recent_cases_nearby = "В радиусе 1 км недавних госпитализаций в вашем районе не обнаружено.";
